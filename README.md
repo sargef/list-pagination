@@ -2,7 +2,7 @@
 
 
 <h3><b><p align="center">Click to see live list pagination!!</p></b></h3>
-<a target="_blank" href=https://randomtimequotegenerator.sarahshelley.x10host.com/><img src="https://github.com/sargef/list-pagination/blob/master/images/back.JPG"></a>
+<a target="_blank" href=https://listpagination.sarahshelley.x10host.com//><img src="https://github.com/sargef/list-pagination/blob/master/images/back.JPG"></a>
 
 <h2><b><p align="center">List Pagination using dynamic Javascript for pagination elements</p></b></h2>
 
