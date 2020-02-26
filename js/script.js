@@ -1,114 +1,139 @@
 "use-strict";
 
 //Global variables
+const list = document.querySelectorAll('.student-item'); // Grab list of students from student item Class
 const pages = 10; // Allocate how many students are to appear on each page
-const list = document.getElementsByClassName('student-item cf'); // Grab list of students from Class
-const page = 1; // Set first page
-const pagesAmount = Math.ceil(list.length / 10); // Allocate how many students to show on each page
-const a = document.getElementsByTagName('a'); // Set a tag for list pagination
-
-const studentList = document.querySelector(".student-list"); // To help find student search results match
-const divPageHeader = document.querySelector(".page-header"); // To allocate where search bar will appear
-const searchDiv = document.createElement("div"); // Dynamically create div element
-const search = document.createElement("input"); //Dynamically create an input bar for search
-const submitButton = document.createElement("button"); //Dynamically create a submit button for search
-const divNoResult = document.createElement('div'); // Dynamically create an element to filter out and display no results in search
 
 //Function and loop to show pages - Disply allocated list of students to each page
 const showPage = (list, page) => {
-  for (let i = 0; i < list.length; i++) {
-    if (i >= (page * pages) - pages && i <= (page * pages) -1) {
-      list[i].style.display = 'block';
+  const start = (page * pages) - pages;
+  const end = page * pages;
+  for (let i = 0; i < list.length; i += 1) {
+    const items = list[i];
+    if (i >= start && i < end) {
+      items.style.display = '';
     } else {
-      list[i].style.display = 'none';
-     }
-   }
+      items.style.display = 'none';
+    }
+  }
+};
+
+// Function for student search to filter the amount of students available from search and hide others.
+const filterList = (list, searchInput) => {
+  const filteredList = Array.from(list).filter(
+    student => student.textContent.toLowerCase().includes(searchInput.value.toLowerCase()),
+  );
+  for (let i = 0; i < list.length; i += 1) {
+    const items = list[i];
+    if (filteredList.indexOf(items) !== -1) {
+      items.style.display = '';
+    } else {
+      items.style.display = 'none';
+  }
+}
+  return filteredList;
 };
 
 /* Created Elements to display students on a paginated list and only create the amount of pages needed
   to cover the list of students. If more students were added, the page numbers would increase automatically
 */
 // Function to display page links dynamically, then return 10 students per page
-const div = document.createElement('div');
-const ul = document.createElement('ul');
-div.className = 'pagination';
-div.appendChild(ul);
-document.querySelector('div.page').appendChild(div);
+const appendPageLinks = (list) => {
+  let pageLinks = document.querySelectorAll('a');
+  for (let i = 0; i < pageLinks.length; i += 1) {
+    pageLinks[i].parentNode.removeChild(pageLinks[i]);
+  }
+  const pagesAmount = (list.length % 10 === 0) ? (list.length / 10) : Math.floor(list.length / 10) + 1;
+  const page = document.querySelector('.page');
+  const div = document.createElement('div');
+  div.className = 'pagination';
+  const ul = document.createElement('ul');
 
-const pageLink = () => {
-  for (let i = 0; i < pagesAmount; i++) {
-    const page = i + 1;
+  for (let i = 0; i < pagesAmount; i += 1) {
     const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.setAttribute('href', '#');
+    a.textContent = i + 1;
     ul.appendChild(li);
-    li.innerHTML = `<a href="#" class="">${page}</a>`;
-  };
+    li.appendChild(a);
+    if (i === 0) {
+      a.className = 'active';
+    } else {
+      a.className = '';
+    }
 
-  for (let i = 0; i < a.length; i++) {
-    a[i].addEventListener('click', (event) => {
-      for (let i = 0; i < a.length; i++) {
-        a[i].className = "";
-      };
-      showPage(list, i + 1);
-      event.target.ClassName = 'active';
-     })
-   }
-};
-// Set attributes for search bar features
-searchDiv.className = "student-search";
-search.setAttribute("placeholder","Search for students...");
-search.setAttribute("id", "search-input");
-submitButton.setAttribute("id", "submit");
-submitButton.textContent = "Submit";
-// Set attributes for no match feature
-divNoResult.className = 'no-result';
-divNoResult.style.textAlign = 'center';
-divNoResult.style.color = 'red';
-divNoResult.style.fontSize = '20px';
-// Append all elements
-searchDiv.appendChild(search);
-searchDiv.appendChild(submitButton);
-divPageHeader.appendChild(searchDiv);
-divPageHeader.appendChild(divNoResult);
+  div.appendChild(ul);
+  page.appendChild(div);
 
-const userSearch = document.querySelector("#search-input");
-const userSubmit = document.querySelector("#submit");
+// Event listener for active page link allocation
+  pageLinks = document.querySelectorAll('a');
+  Array.from(pageLinks).forEach((itemLink) => {
+    itemLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.querySelector('.active').className = '';
+      e.target.className = 'active';
+      showPage(list, e.target.textContent);
+    });
+  });
+}};
+
 
 //function to search results and return match while hidding list and displaying no results if no match found
-const searchBar = (userInput, search) => {
-   let li, listText, i, txtValue;
-   let filter = userSearch.value.toLowerCase();
-   li = studentList.getElementsByTagName("li");
-    for (let i = 0; i < li.length; i += 1) {
-      listText = li[i].firstElementChild.getElementsByTagName("h3")[0];
-      txtValue = listText.textContent || listText.innerText;
-      if(txtValue.toLowerCase().indexOf(filter) > -1) {
-        li[i].style.display = "";
-        div.style.display = "";
-        divNoResult.innerHTML = "";
-        if (listText.value.length === 0) {
-          divNoResult.innerHTML = "<h1>No Results</h1>";
-          div.style.display = "none";
-        } else {
-          divNoResult.innerHTML = "";
-          }
-        } else {
-        li[i].style.display = "none";
-        div.style.display = "none";
-        divNoResult.innerHTML = "<h1>No Results</h1>";
-        }
-     }
-  }
+const appendSearchBar = () => {
+  const filterResults = (list, searchInput) => {
+    const filteredList = filterList(list, searchInput);
+    const divNoResults = document.querySelector('.results');
+    if (filteredList.length === 0) {
+      divNoResults.style.display = '';
+    } else {
+      divNoResults.style.display = 'none';
+    showPage(filteredList, 1);
+    appendPageLinks(filteredList);
+    }
+  };
 
-// Click events for keyup on search bar
-userSearch.addEventListener("keyup", (e) => {
-   searchBar(e.target.value, list);
+  // Set attributes for search bar features and appearance
+  const pageHeader = document.querySelector('.page-header');
+  const page = document.querySelector('.page');
+  const divNoResults = document.createElement('span');
+  divNoResults.className = 'results';
+  divNoResults.textContent = 'No results';
+  divNoResults.style.textAlign = 'center';
+  divNoResults.style.color = 'red';
+  divNoResults.style.fontSize = '25px';
+  divNoResults.style.clear = 'both';
+  divNoResults.style.width = '70%';
+  divNoResults.style.position = 'absolute';
+  divNoResults.style.marginTop = "-40px";
+  divNoResults.style.display = 'none';
+  const searchDiv = document.createElement('div');
+  searchDiv.className = 'student-search';
+  const searchInputs = document.createElement('input');
+  searchInputs.setAttribute("placeholder" , "Search for students...");
+  const submitButton = document.createElement('button');
+  submitButton.textContent = "Search";
+//Append elements to page
+  pageHeader.appendChild(searchDiv);
+  searchDiv.appendChild(searchInputs);
+  searchDiv.appendChild(submitButton);
+  page.appendChild(divNoResults);
 
-})
-// Click event for sumbit on search bad
-userSubmit.addEventListener("submit", (e) => {
-   searchBar(e.target.value, list);
-})
+// Event listener for click on submit button
+  document.querySelector('button').addEventListener('click', (e) => {
+    e.preventDefault();
+    filterResults(list, e.target);
+  });
 
-showPage(list, page);
-pageLink();
-searchBar();
+// Event listener for search on input bar
+  document.querySelector('input').addEventListener('keyup', (e) => {
+    filterResults(list, e.target);
+  });
+};
+
+
+// Event Listener to load functions at time of page execution
+document.addEventListener('DOMContentLoaded', () => {
+  showPage(list, 1);
+  appendPageLinks(list);
+  if (document.querySelector('.student-search') === null) appendSearchBar();
+});
